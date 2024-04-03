@@ -1,0 +1,92 @@
+# Product Table
+ CREATE TABLE product_dim (
+    Product_dim_id INT NOT NULL,
+    Product_id INT
+    ProductSubcategoryID INT,
+    ProductCategoryID INT,
+    Name VARCHAR(255),
+    ProductNumber VARCHAR(50),
+    CategoryName VARCHAR(255),
+    SubCategoryName VARCHAR(255),
+    PRIMARY KEY(Product_dim_id)
+);
+
+# Territory Table
+CREATE TABLE territory_dim (
+    Territory_dim_id INT,
+    Territory_id int,
+    Name VARCHAR(255),
+    CountryRegionCode VARCHAR(3),
+    GroupName VARCHAR(50),
+    PRIMARY KEY(Territory_dim_id)
+);
+# Customer Table
+CREATE TABLE customer_dim (
+    Customer_dim_id INT,
+    Customer_id INT, 
+    PersonType  VARCHAR(50),
+    FirstName  VARCHAR(50),
+    LastName VARCHAR(50),
+    START_DATE DATETIME,
+    END_DATE DATETIME,
+    ORDER_FLAG INT
+    PRIMARY KEY(Customer_dim_id)
+);
+# Date Table
+CREATE TABLE date_dim (
+    date datetime,
+    year INT,
+    month_name VARCHAR(20),
+    month_number INT,
+    PRIMARY KEY(date)
+);
+
+# CUSTOMER Trigger for Null
+CREATE TRIGGER DELETE_NULL_CUSTOMER
+ON customer_dim
+AFTER INSERT
+AS 
+BEGIN 
+     DELETE FROM customer_dim WHERE Customer_id IS NULL
+END;
+
+# Product Trigger for Null
+CREATE TRIGGER DELETE_NULL_PRODUCT
+ON product_dim
+AFTER INSERT
+AS 
+BEGIN 
+     DELETE FROM product_dim WHERE Product_id IS NULL
+END;
+
+
+-- Customer Trigger for Flag Update
+CREATE TRIGGER UPDATE_FLAG_CUSTOMER
+ON customer_dim
+AFTER UPDATE 
+AS
+BEGIN 
+	UPDATE customer_dim
+	SET ORDER_FLAG=0
+	WHERE END_DATE<=GETDATE();
+
+	UPDATE customer_dim
+	SET ORDER_FLAG=1
+	WHERE END_DATE>=GETDATE();
+END;
+
+-- ProductTrigger for Flag Update
+CREATE TRIGGER UPDATE_FLAG_PRODUCT
+ON product_dim
+AFTER UPDATE 
+AS
+BEGIN 
+	UPDATE product_dim
+	SET ORDER_FLAG=0
+	WHERE END_DATE<=GETDATE();
+
+	UPDATE product_dim
+	SET ORDER_FLAG=1
+	WHERE END_DATE>=GETDATE();
+END
+
